@@ -1,1 +1,632 @@
 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>12-Week Metabolic Transformation Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        background-color: #f8fafc;
+        color: #0f172a;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 350px;
+        max-height: 400px;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 400px;
+        }
+      }
+      .material-card {
+        background-color: #ffffff;
+        border-radius: 16px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.05),
+          0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .material-card:hover {
+        transform: translateY(-2px);
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .tab-btn {
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+      }
+      .tab-btn.active {
+        border-bottom-color: #3b82f6;
+        color: #1d4ed8;
+        font-weight: 700;
+        background-color: #eff6ff;
+      }
+      .day-btn {
+        transition: all 0.2s ease;
+      }
+      .day-btn.active {
+        background-color: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4);
+        transform: scale(1.05);
+      }
+      .view-section {
+        display: none;
+        animation: fadeIn 0.4s ease-in-out forwards;
+      }
+      .view-section.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <!-- Chosen Palette: Energetic Blues & Vibrant Accents (Primary: Blue #2563eb, Success: Emerald #10b981, Warning: Amber #f59e0b, Alert: Rose #e11d48, Background: Slate-50 #f8fafc) -->
+    <!-- Application Structure Plan: A highly functional, task-oriented dashboard structure. Instead of reading a static PDF, the user logs in and immediately sees "What do I need to do today?" via the Daily Protocol view. Secondary tabs provide the long-term context (12-Week Roadmap) and the supporting lifestyle rules (Nutrition & Safety). This structure minimizes cognitive load for a busy professional, turning a static document into an interactive daily tool. -->
+    <!-- Visualization & Content Choices: 
+1. Daily Protocol -> Goal: Organize/Interact -> Interactive Day Selector driving dynamic HTML/CSS exercise cards. Presents the immediate actionable data cleanly without SVG/Mermaid.
+2. 12-Week Roadmap -> Goal: Change -> Chart.js Dual-Axis Line Chart. Correlates the progressive increase in morning walk distance with the workout session duration over 12 weeks.
+3. Diet & Safety -> Goal: Compare/Inform -> HTML/CSS Grid with distinct color coding (Emerald vs Rose) for Eat/Avoid lists, plus prominent warning banners for BP/Knee safety.
+-->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <header class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">My Transformation Dashboard</h1>
+            <p class="text-lg text-slate-600 font-medium">12-Week Knee-Friendly, Cardiac-Safe Protocol</p>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <div class="bg-blue-50 border border-blue-100 px-4 py-2 rounded-xl flex flex-col items-center justify-center">
+              <span class="text-xs text-blue-600 font-bold uppercase tracking-wider">Target Cal</span>
+              <span class="text-xl font-black text-blue-900">2,500</span>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl flex flex-col items-center justify-center">
+              <span class="text-xs text-emerald-600 font-bold uppercase tracking-wider">Daily Steps</span>
+              <span class="text-xl font-black text-emerald-900">10k+</span>
+            </div>
+            <div class="bg-cyan-50 border border-cyan-100 px-4 py-2 rounded-xl flex flex-col items-center justify-center">
+              <span class="text-xs text-cyan-600 font-bold uppercase tracking-wider">Hydration</span>
+              <span class="text-xl font-black text-cyan-900">4L</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <nav class="flex overflow-x-auto hide-scrollbar border-b-2 border-slate-200 mb-8 rounded-t-xl bg-white sticky top-0 z-10 shadow-sm">
+        <button
+          class="tab-btn active px-6 py-4 text-slate-600 font-semibold whitespace-nowrap focus:outline-none flex-1 text-center text-lg"
+          data-target="daily-view"
+        >
+          &#128197; Daily Protocol
+        </button>
+        <button
+          class="tab-btn px-6 py-4 text-slate-600 font-semibold whitespace-nowrap focus:outline-none flex-1 text-center text-lg"
+          data-target="roadmap-view"
+        >
+          &#128200; 12-Week Roadmap
+        </button>
+        <button class="tab-btn px-6 py-4 text-slate-600 font-semibold whitespace-nowrap focus:outline-none flex-1 text-center text-lg" data-target="rules-view">
+          &#127823; Diet & Safety
+        </button>
+      </nav>
+
+      <main class="min-h-[600px]">
+        <section id="daily-view" class="view-section active">
+          <div class="mb-6">
+            <p class="text-slate-600 text-lg mb-4">
+              Select a day to view your specific workout routine. Focus on strict form and breathing, especially during Phase 1.
+            </p>
+
+            <div class="flex overflow-x-auto hide-scrollbar gap-2 pb-4 snap-x">
+              <button
+                class="day-btn active bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold min-w-[100px] snap-center"
+                data-day="Monday"
+              >
+                Mon
+              </button>
+              <button
+                class="day-btn bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold min-w-[100px] snap-center"
+                data-day="Tuesday"
+              >
+                Tue
+              </button>
+              <button
+                class="day-btn bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold min-w-[100px] snap-center"
+                data-day="Wednesday"
+              >
+                Wed
+              </button>
+              <button
+                class="day-btn bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold min-w-[100px] snap-center"
+                data-day="Thursday"
+              >
+                Thu
+              </button>
+              <button
+                class="day-btn bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold min-w-[100px] snap-center"
+                data-day="Friday"
+              >
+                Fri
+              </button>
+              <button
+                class="day-btn bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold min-w-[100px] snap-center"
+                data-day="Saturday"
+              >
+                Sat
+              </button>
+              <button
+                class="day-btn bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold min-w-[100px] snap-center"
+                data-day="Sunday"
+              >
+                Sun
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-4 border-b border-slate-100">
+              <div>
+                <h2 id="day-title" class="text-2xl font-extrabold text-blue-900 mb-1">Push Day (Chest, Shoulders, Triceps)</h2>
+                <p id="day-target" class="text-blue-600 font-medium tracking-wide text-sm uppercase">Chest • Shoulders • Triceps</p>
+              </div>
+              <div class="mt-4 md:mt-0 bg-slate-100 px-4 py-2 rounded-lg flex items-center">
+                <span class="text-xl mr-2">&#9201;&#65039;</span>
+                <span id="day-duration" class="font-bold text-slate-700">30-35 min</span>
+              </div>
+            </div>
+
+            <div id="day-instruction" class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-8 text-blue-900 font-medium">
+              Keep core tight on all pushups. Exhale on the push. Don't lock elbows at the top.
+            </div>
+
+            <div id="exercise-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+          </div>
+        </section>
+
+        <section id="roadmap-view" class="view-section">
+          <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Phase Progression Strategy</h2>
+            <p class="text-slate-600 mb-8 text-lg">
+              This chart visualizes how your intensity scales over the 12 weeks. Your morning walk distance progressively increases to enhance Zone 2 cardio
+              (burning liver fat), while resistance session times increase slightly to accommodate extra sets, building the muscle needed to lower your HbA1c.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                <span class="block font-bold text-slate-800 text-lg mb-1">Phase 1: Foundation (Wk 1-4)</span>
+                <span class="text-sm text-slate-500">Learn form, build base. 2.5km walk.</span>
+              </div>
+              <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 text-center">
+                <span class="block font-bold text-blue-800 text-lg mb-1">Phase 2: Build (Wk 5-8)</span>
+                <span class="text-sm text-blue-600">+2 reps, +1 set. 3.5km walk.</span>
+              </div>
+              <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 text-center">
+                <span class="block font-bold text-indigo-800 text-lg mb-1">Phase 3: Intensify (Wk 9-12)</span>
+                <span class="text-sm text-indigo-600">Heavier weights. 4km walk.</span>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <canvas id="progressionChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section id="rules-view" class="view-section">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-5 space-y-6">
+              <div class="material-card bg-rose-50 border-l-8 border-rose-500 p-6">
+                <h3 class="text-xl font-black text-rose-900 mb-3 flex items-center">
+                  <span class="text-2xl mr-2">&#9888;&#65039;</span> Critical Safety Rules
+                </h3>
+                <ul class="space-y-4 text-rose-800 font-medium">
+                  <li class="flex items-start">
+                    <span class="mr-2">&#10145;&#65039;</span>
+                    <span
+                      ><strong>Blood Pressure:</strong> NEVER hold your breath during exertion. Exhale forcefully on the effort. Take BP medication before
+                      workouts.</span
+                    >
+                  </li>
+                  <li class="flex items-start">
+                    <span class="mr-2">&#10145;&#65039;</span>
+                    <span><strong>Heart Rate:</strong> Keep heart rate strictly below 150 bpm. Stop immediately if dizzy or if a headache occurs.</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="mr-2">&#10145;&#65039;</span>
+                    <span
+                      ><strong>Right Knee:</strong> Do not substitute or add squats/lunges. Stick exclusively to the prescribed floor-based lower body movements
+                      (bridges, clamshells).</span
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div class="material-card bg-amber-50 border-l-8 border-amber-500 p-6">
+                <h3 class="text-xl font-black text-amber-900 mb-2 flex items-center">
+                  <span class="text-2xl mr-2">&#127919;</span> Clinical Targets (3 Months)
+                </h3>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                  <div class="bg-white p-3 rounded-lg text-center border border-amber-100">
+                    <span class="block text-sm text-amber-700 font-bold uppercase">Weight</span>
+                    <span class="block font-black text-lg text-amber-900">&lt; 107 kg</span>
+                  </div>
+                  <div class="bg-white p-3 rounded-lg text-center border border-amber-100">
+                    <span class="block text-sm text-amber-700 font-bold uppercase">HbA1c</span>
+                    <span class="block font-black text-lg text-amber-900">&lt; 5.6%</span>
+                  </div>
+                </div>
+                <p class="text-xs text-amber-800 mt-3 text-center">Repeat fasting blood sugar, lipid panel, and HbA1c as advised by Dr. Bharat Reddy M.</p>
+              </div>
+            </div>
+
+            <div class="lg:col-span-7">
+              <div class="material-card p-6 md:p-8 h-full flex flex-col">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">South Indian Diet Protocol</h2>
+                <p class="text-slate-600 mb-6">Strategic food choices to manage hypertension (low sodium) and fatty liver/prediabetes (low glycemic index).</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+                  <div class="bg-emerald-50 rounded-2xl p-5 border border-emerald-100">
+                    <h3 class="text-lg font-bold text-emerald-800 mb-4 flex items-center border-b border-emerald-200 pb-2">
+                      <span class="text-2xl mr-2">&#9989;</span> Prioritize
+                    </h3>
+                    <ul class="space-y-3 text-emerald-900 text-sm">
+                      <li class="flex items-start">
+                        <span class="mr-2 text-emerald-600">&#10004;</span> <strong>Carbs:</strong> Ragi dosa, jowar roti, pesarattu, oats upma.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-emerald-600">&#10004;</span> <strong>Curries:</strong> Sambar, kootu, poriyal (minimal oil), rasam.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-emerald-600">&#10004;</span> <strong>Veg:</strong> Bitter gourd, drumstick, ivy gourd, okra, cluster beans.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-emerald-600">&#10004;</span> <strong>Fruits:</strong> Guava, jamun, amla, pomegranate, papaya, apple.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-emerald-600">&#10004;</span> <strong>Proteins:</strong> Grilled fish, boiled chicken (no skin), moong dal.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-emerald-600">&#10004;</span> <strong>Daily:</strong> Fenugreek seeds (soaked), curry leaves.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="bg-rose-50 rounded-2xl p-5 border border-rose-100">
+                    <h3 class="text-lg font-bold text-rose-800 mb-4 flex items-center border-b border-rose-200 pb-2">
+                      <span class="text-2xl mr-2">&#10060;</span> Limit or Avoid
+                    </h3>
+                    <ul class="space-y-3 text-rose-900 text-sm">
+                      <li class="flex items-start">
+                        <span class="mr-2 text-rose-600">&#10006;</span> <strong>Carbs:</strong> White rice in large portions, rava upma, maida parotta.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-rose-600">&#10006;</span> <strong>Fried:</strong> Deep-fried items: bonda, vada, bajji, murukku.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-rose-600">&#10006;</span> <strong>BP Risk:</strong> Pickles, papads (high salt raises BP dangerously).
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-rose-600">&#10006;</span> <strong>High Sugar:</strong> Mango, grapes, sapota, jackfruit.
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-rose-600">&#10006;</span> <strong>Allergy/Fat:</strong> Mutton, prawns, crabs (allergy confirmed).
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 text-rose-600">&#10006;</span> <strong>Drinks:</strong> Sweetened filter coffee/tea in excess.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const wrapLabels = function (labels) {
+        return labels.map((label) => {
+          if (label.length <= 16) return label;
+          const words = label.split(" ");
+          let lines = [];
+          let currentLine = "";
+          words.forEach((word) => {
+            if ((currentLine + word).length > 16) {
+              lines.push(currentLine.trim());
+              currentLine = word + " ";
+            } else {
+              currentLine += word + " ";
+            }
+          });
+          if (currentLine) lines.push(currentLine.trim());
+          return lines;
+        });
+      };
+
+      const commonTooltipConfig = {
+        callbacks: {
+          title: function (tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+              return label.join(" ");
+            }
+            return label;
+          }
+        },
+        backgroundColor: "rgba(15, 23, 42, 0.9)",
+        titleFont: { family: "Inter", size: 14 },
+        bodyFont: { family: "Inter", size: 13 },
+        padding: 12
+      };
+
+      const workoutData = {
+        Monday: {
+          title: "Push Day",
+          target: "Chest • Shoulders • Triceps",
+          duration: "30-35 min",
+          instruction:
+            "Keep core tight on all pushups. Exhale on the push. Don't lock elbows at the top. *If standard pushups hurt wrists/back, perform on knees.*",
+          color: "blue",
+          exercises: [
+            { name: "Wide pushup", equip: "Pushup board", reps: "3 sets x 10-12 reps", note: "Hands wide on pushup board" },
+            { name: "Shoulder-width pushup", equip: "Pushup board", reps: "3 sets x 10-15 reps", note: "Standard position on board" },
+            { name: "Tricep pushup", equip: "Pushup board", reps: "3 sets x 8-10 reps", note: "Narrow grip, elbows close to body" },
+            {
+              name: "Dumbbell shoulder press",
+              equip: "3kg -> 5kg",
+              reps: "3 sets x 12 reps",
+              note: "Seated or standing, press overhead. Do not arch lower back."
+            },
+            { name: "Lateral raises", equip: "2-3 kg", reps: "3 sets x 12-15 reps", note: "Slight bend in elbows, slow & controlled" },
+            { name: "Chest fly (floor)", equip: "3-5 kg", reps: "3 sets x 12 reps", note: "Lying on mat, slight elbow bend throughout" }
+          ]
+        },
+        Tuesday: {
+          title: "Core + Lower (Knee-Safe)",
+          target: "Glutes • Core • Hips • Calves",
+          duration: "30-35 min",
+          instruction: "These exercises build the glute and hip strength that directly protects your right knee. Don't skip them.",
+          color: "emerald",
+          exercises: [
+            { name: "Glute bridge", equip: "Yoga mat", reps: "3 sets x 20 reps", note: "Drive through heels, hold and squeeze glutes at top" },
+            { name: "Bird dog", equip: "Yoga mat", reps: "3 sets x 10/side", note: "Opposite arm + leg, flat back, 3 sec hold per rep" },
+            { name: "Dead bug", equip: "Yoga mat", reps: "3 sets x 10/side", note: "CRITICAL: Lower back must stay flat glued to the mat" },
+            { name: "Clamshell", equip: "Yoga mat", reps: "3 sets x 15/side", note: "Side-lying, feet together, opens the hip" },
+            { name: "Tummy twister", equip: "Twister board", reps: "3 sets x 45 sec", note: "Controlled rotation - not fast spinning" },
+            { name: "Calf raises", equip: "5 kg dumbbell", reps: "3 sets x 20 reps", note: "Hold dumbbell for extra resistance" }
+          ]
+        },
+        Wednesday: {
+          title: "Pull Day",
+          target: "Back • Biceps • Rear delts",
+          duration: "30-35 min",
+          instruction: "Focus on squeezing the back at the top of every row—don't just lift with the arms.",
+          color: "indigo",
+          exercises: [
+            { name: "Bent-over dumbbell row", equip: "5 kg each arm", reps: "3 sets x 12/arm", note: "Hinge at hips, back straight, pull elbow back" },
+            { name: "Reverse fly", equip: "2-3 kg", reps: "3 sets x 12 reps", note: "Hinge forward, arms wide (targets rear shoulder)" },
+            { name: "Bicep curl", equip: "5 kg dumbbells", reps: "3 sets x 12 reps", note: "No swinging body - strict controlled form" },
+            { name: "Hammer curl", equip: "5 kg dumbbells", reps: "3 sets x 12 reps", note: "Neutral grip, both arms simultaneously" },
+            { name: "Superman hold", equip: "Yoga mat", reps: "3 sets x 12 reps", note: "Face down, lift arms + legs, 3 sec hold" },
+            { name: "Roller upper back", equip: "Roller", reps: "1 set x 2 min", note: "Thoracic spine release, go slow" }
+          ]
+        },
+        Thursday: {
+          title: "Core + Mobility",
+          target: "Core • Hamstrings • Lower back",
+          duration: "30-35 min",
+          instruction: "Hamstrings and lower back were flagged as limited. Take your time with the stretches - don't rush. Breathe deeply.",
+          color: "amber",
+          exercises: [
+            { name: "Situp (controlled)", equip: "Situp bar", reps: "3 sets x 15-20 reps", note: "Slow up, slow down - no jerking neck" },
+            { name: "Leg raise (floor)", equip: "Yoga mat", reps: "3 sets x 15 reps", note: "Lower back flat on mat, legs straight" },
+            { name: "Russian twist", equip: "2-3 kg dumbbell", reps: "3 sets x 20 total", note: "Feet slightly raised off floor, controlled twist" },
+            { name: "Plank", equip: "Yoga mat", reps: "3 sets x 25-30 sec", note: "Elbows under shoulders, don't let hips sag" },
+            { name: "Seated hamstring stretch", equip: "Yoga mat", reps: "2 sets x 30s hold", note: "Hold each side, breathe through it" },
+            { name: "Cat-cow stretch", equip: "Yoga mat", reps: "2 sets x 10 cycles", note: "Linked with breath, 5 sec each position" }
+          ]
+        },
+        Friday: {
+          title: "Full Body Circuit",
+          target: "All muscle groups (3 rounds)",
+          duration: "35-40 min",
+          instruction: "Do all 6 exercises back-to-back as one round. Rest 90 sec between rounds. This is your highest-intensity day.",
+          color: "rose",
+          exercises: [
+            { name: "Pushup", equip: "Pushup board", reps: "3 rounds x 15 reps", note: "Choose grip from pushup board (knees if needed)" },
+            { name: "Glute bridge pulse", equip: "Yoga mat", reps: "3 rounds x 20 reps", note: "Hold at top, small continuous pulses" },
+            { name: "Dumbbell shoulder press", equip: "3-5 kg", reps: "3 rounds x 12 reps", note: "Standing for extra core activation" },
+            { name: "Bent-over row", equip: "5 kg dumbbells", reps: "3 rounds x 12 reps", note: "Both arms simultaneously" },
+            { name: "Tummy twister", equip: "Twister board", reps: "3 rounds x 30 sec", note: "Continuous controlled rotation" },
+            { name: "Plank", equip: "Yoga mat", reps: "3 rounds x 30 sec", note: "Hold steady, core tight throughout" }
+          ]
+        },
+        Saturday: {
+          title: "Active Recovery",
+          target: "Roller + stretching full body",
+          duration: "25-30 min",
+          instruction: "Recovery is as important as any workout. Use the roller on all major muscle groups slowly.",
+          color: "cyan",
+          exercises: [
+            { name: "Roller quads", equip: "Roller", reps: "1 set x 2 min", note: "Front of thighs, 60 sec each leg" },
+            { name: "Roller IT band", equip: "Roller", reps: "1 set x 90s/leg", note: "Side of thigh, tender area, go slowly" },
+            { name: "Roller-calves", equip: "Roller", reps: "1 set x 60s/leg", note: "Lower leg, pause on tight spots" },
+            { name: "Roller upper back", equip: "Roller", reps: "1 set x 2 min", note: "Between shoulder blades" },
+            { name: "Hip flexor stretch", equip: "Yoga mat", reps: "2 sets x 30 sec", note: "Low lunge hold - 30 sec each side" },
+            { name: "Child's pose", equip: "Yoga mat", reps: "2 sets x 45 sec", note: "Wide knees, arms stretched forward" }
+          ]
+        },
+        Sunday: {
+          title: "Full Rest Day",
+          target: "Muscles rebuild on rest days",
+          duration: "0 min",
+          instruction: "No workout. Morning walk is optional only if you feel good. Light stretching (5-10 min) is fine.",
+          color: "slate",
+          exercises: [{ name: "Rest & Hydrate", equip: "Water", reps: "Goal: 4 Liters", note: "Allow central nervous system to recover." }]
+        }
+      };
+
+      function renderDay(dayStr) {
+        const data = workoutData[dayStr];
+        document.getElementById("day-title").textContent = data.title;
+        document.getElementById("day-target").textContent = data.target;
+        document.getElementById("day-duration").textContent = data.duration;
+
+        const instrEl = document.getElementById("day-instruction");
+        instrEl.textContent = data.instruction;
+        instrEl.className = `bg-${data.color}-50 border-l-4 border-${data.color}-500 p-4 rounded-r-lg mb-8 text-${data.color}-900 font-medium`;
+
+        const grid = document.getElementById("exercise-grid");
+        grid.innerHTML = "";
+
+        data.exercises.forEach((ex, index) => {
+          const card = document.createElement("div");
+          card.className = `material-card p-5 border-t-4 border-${data.color}-500 flex flex-col h-full`;
+          card.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <span class="bg-slate-100 text-slate-500 font-black rounded-full w-8 h-8 flex items-center justify-center shrink-0 mr-3">${index + 1}</span>
+                    <h3 class="font-bold text-slate-800 text-lg leading-tight flex-1">${ex.name}</h3>
+                </div>
+                <div class="mb-3">
+                    <span class="inline-block bg-${data.color}-100 text-${data.color}-800 text-xs font-bold px-2 py-1 rounded mb-1">&#128260; ${ex.reps}</span><br>
+                    <span class="inline-block bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded">&#127959;&#65039; ${ex.equip}</span>
+                </div>
+                <p class="text-sm text-slate-600 mt-auto pt-3 border-t border-slate-100">${ex.note}</p>
+            `;
+          grid.appendChild(card);
+        });
+      }
+
+      document.querySelectorAll(".day-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          document.querySelectorAll(".day-btn").forEach((b) => b.classList.remove("active"));
+          e.target.classList.add("active");
+          renderDay(e.target.getAttribute("data-day"));
+        });
+      });
+
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".view-section").forEach((s) => s.classList.remove("active"));
+
+          e.currentTarget.classList.add("active");
+          document.getElementById(e.currentTarget.getAttribute("data-target")).classList.add("active");
+        });
+      });
+
+      const ctxProg = document.getElementById("progressionChart").getContext("2d");
+      new Chart(ctxProg, {
+        type: "line",
+        data: {
+          labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7", "Week 8", "Week 9", "Week 10", "Week 11", "Week 12"],
+          datasets: [
+            {
+              label: "Morning Walk Distance (km)",
+              data: [2.5, 2.5, 2.5, 2.5, 3.5, 3.5, 3.5, 3.5, 4.0, 4.0, 4.0, 4.0],
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              yAxisID: "y",
+              tension: 0.1,
+              fill: true,
+              borderWidth: 3,
+              stepped: true
+            },
+            {
+              label: "Avg. Resistance Session (mins)",
+              data: [32, 32, 32, 32, 37, 37, 37, 37, 42, 42, 42, 42],
+              borderColor: "#3b82f6",
+              yAxisID: "y1",
+              tension: 0.1,
+              borderDash: [5, 5],
+              fill: false,
+              borderWidth: 3,
+              stepped: true
+            }
+          ]
+        },
+        options: {
+          maintainAspectRatio: false,
+          responsive: true,
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+          plugins: {
+            tooltip: commonTooltipConfig,
+            legend: {
+              position: "top",
+              labels: { font: { family: "Inter", weight: "bold" }, color: "#334155" }
+            }
+          },
+          scales: {
+            y: {
+              type: "linear",
+              display: true,
+              position: "left",
+              title: { display: true, text: "Walk Distance (km)", color: "#10b981", font: { weight: "bold" } },
+              min: 0,
+              max: 5,
+              grid: { color: "#f1f5f9" }
+            },
+            y1: {
+              type: "linear",
+              display: true,
+              position: "right",
+              title: { display: true, text: "Session Length (mins)", color: "#3b82f6", font: { weight: "bold" } },
+              min: 20,
+              max: 50,
+              grid: { drawOnChartArea: false }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      renderDay("Monday");
+    </script>
+  </body>
+</html>
